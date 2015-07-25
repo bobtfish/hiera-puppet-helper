@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "example::bar" do
-  before { skip 'Known Issue, currently not working' }
+  let(:facts) {{ :cache_bust => Time.now }}
 
   describe "first in-line hiera_data test with a" do
     let(:hiera_data) { { :bar_message => "a" } }

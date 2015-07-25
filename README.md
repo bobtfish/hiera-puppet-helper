@@ -138,11 +138,11 @@ demonstrates the use of a shared context.
       it { should contain_notify("foo").with_message("bar") }
     end
 
-### Known issues
+### Caveats
 
-Right now, the Gem does not support multiple `let(:hiera_data)` for one class:
+Right now, the Gem would not support multiple `let(:hiera_data)` for one class normally:
 
-```
+```ruby
   describe "in-line hiera_data test" do
     let(:hiera_data) { { :bar_message => "a" } }
     it { should contain_notify("bar").with_message("a") }
@@ -154,4 +154,22 @@ Right now, the Gem does not support multiple `let(:hiera_data)` for one class:
   end
 ```
 
-Will always fail, as the :hiera_data doesnt get cleared out.
+*However*, you can fix this by adding `let(:facts) {{ :cache_bust => Time.now }}` which will invalidate the cache for each test, meaning that the hiera data will work:
+
+```ruby
+describe "example::bar" do
+  let(:facts) {{ :cache_bust => Time.now }}
+
+  describe "first in-line hiera_data test with a" do
+    let(:hiera_data) { { :bar_message => "a" } }
+    it { should contain_notify("bar").with_message("a") }
+  end
+
+  describe "second in-line hiera_data test with b" do
+    let(:hiera_data) { { :bar_message => "b" } }
+    it { should contain_notify("bar").with_message("b") }
+  end
+
+end
+```
+
